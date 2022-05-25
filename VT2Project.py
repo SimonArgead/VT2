@@ -15,10 +15,50 @@ def ShiTomasi(input2gray):
     #we can compute the euclidean distance between the points.
     #In case of a small distance, we discard the points.
     #in case of a distance to large, we also discard them. Using this, we can get the points we want.
+    points = []
+    CornerPoints2 = []
+    distance2 = []
+    minv = 3000
+    for e in range(len(corners)-1):
+        k = e
+        val1 = corners[k]
+        for j in range(len(corners)):
+            h = j
+            val2 = corners[h]
+            dist = float(scipy.spatial.distance.cdist(val1,val2))
+            if dist < 690 and dist > 680: #680
+                CornerPoints2.append([val1, val2])
+                distance2.append(dist)
+                
+    for q in range(len(CornerPoints2)):
+        p1 = CornerPoints2[q]
+        p2 = p1[0]
+        p3 = p2[0]
+        value2 = p3[0]
+        if value2 < minv:
+            minv = value2
+            point = p2
+            p4 = p1[1]
+            points.append(p2)
+            points.append(p4)
+   
+    CornerPoints3 = []
+    distance3 = []
+    for e in range(len(corners)-1):
+        k = e
+        val1 = corners[k]
+        for j in range(len(corners)):
+            h = j
+            val2 = corners[h]
+            dist = float(scipy.spatial.distance.cdist(val1,val2))
+            if dist < 365 and dist > 360: #680
+                CornerPoints3.append([val1, val2])
+                distance3.append(dist)
+                points.append(val2)
     
-    coordinate1 = corners[0]
-    coordinate2 = corners[1]
-    coordinate3 = corners[3]
+    coordinate1 =  points[0]#1060,800
+    coordinate2 =  points[1]#706,875
+    coordinate3 =  points[2]#19,811
     
     hyp = float(scipy.spatial.distance.cdist(coordinate1,coordinate2))
     cathodeA = float(scipy.spatial.distance.cdist(coordinate1,coordinate3))
@@ -29,14 +69,14 @@ def ShiTomasi(input2gray):
 
 if __name__ == "__main__":
     start = time.time()
-    input1 = cv2.imread("C:/Users/shans/OneDrive/Skrivebord/AAU/8 Semester/Billeder/VT2.8Reduced.png", cv2.IMREAD_COLOR)
+    input1 = cv2.imread("C:/Users/shans/OneDrive/Skrivebord/AAU/8 Semester/Billeder/VT2.1Reduced.png", cv2.IMREAD_COLOR)
     input2 = cv2.imread("C:/Users/shans/OneDrive/Skrivebord/AAU/8 Semester/Billeder/VT2.2Reduced.png", cv2.IMREAD_COLOR)
     #img1 = cv2.fastNlMeansDenoisingColored(input1,None,7,21,5,10)
     #img2 = cv2.fastNlMeansDenoisingColored(input2,None,7,21,5,10)
     input1gray = cv2.cvtColor(input1, cv2.COLOR_BGR2GRAY)
     input2gray = cv2.cvtColor(input2, cv2.COLOR_BGR2GRAY)
     img1 = cv2.GaussianBlur(input1gray, (3, 3), 0)
-    img2 = cv2.GaussianBlur(input2gray, (3, 3), 0)
+    img2 = cv2.GaussianBlur(input2gray, (7, 7), 0)
     min_area = 5000
     max_area = 100000
     image_number = 0
@@ -172,14 +212,18 @@ if __name__ == "__main__":
     #since we can't see it on the one we already used (at least not enough).
 
 
-
     [hyp, cathodeA, cathodeB] = ShiTomasi(img2)
     
-    angle = np.rad2deg(math.acos((cathodeA**2+cathodeB**2-hyp**2)/(2*cathodeA*cathodeB))) 
+    if hyp > cathodeA and hyp > cathodeB:    
+        angle = np.rad2deg(math.acos((cathodeA**2+cathodeB**2-hyp**2)/(2*cathodeA*cathodeB))) 
+    elif cathodeA > cathodeB and cathodeA > hyp:
+        angle = np.rad2deg(math.acos((hyp**2+cathodeB**2-cathodeA**2)/(2*hyp*cathodeB))) 
+    elif cathodeB > cathodeA and cathodeB > hyp:
+        angle = np.rad2deg(math.acos((cathodeA**2+hyp**2-cathodeB**2)/(2*hyp*cathodeA))) 
     end = time.time()
     
-    #start_point = (16,12)
-    #end_point = (979,32)
+    #start_point = (19,811)
+    #end_point = (1060,800)
     # Green color in BGR
     #color = (0, 0, 255)
     # Line thickness of 9 px
@@ -209,7 +253,7 @@ if __name__ == "__main__":
     print("Program execution time :", end-start, "seconds")
     
     # Showing the final image.
-    cv2.imshow("Image with Borders", input2)
+    cv2.imshow("Image with Borders", input1)
     #cv2.imshow("Detected features", input2)
     #cv2.imshow("angle", edges)
     cv2.waitKey(0)
